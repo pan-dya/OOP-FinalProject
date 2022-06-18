@@ -1,5 +1,6 @@
 package com.blackjack;
 
+//import
 import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -16,46 +17,58 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-public class Main extends Application{
+public class Main extends Application implements delay{
 
-    private Decks decks = new Decks();
-    private Hand dealer, player;
-    private Text winner = new Text();
+    private Decks decks = new Decks();  //create a deck
+    private Hand dealer, player;        //create a hand for dealer and player
+    private Text winner = new Text();   //winner text, will be shown when the game is over
 
-    private SimpleBooleanProperty playable = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty playable = new SimpleBooleanProperty(false); //set playable to false, for buttons
 
+    //create a horizontal box for the dealer and player
     private HBox dealerCards = new HBox(20);
     private HBox playerCards = new HBox(20);
 
     private Parent createContent() {
-        dealer = new Hand(dealerCards.getChildren());
-        player = new Hand(playerCards.getChildren());
+        dealer = new Hand(dealerCards.getChildren());   //create hand objects
+        player = new Hand(playerCards.getChildren());   //
 
-        Pane main = new Pane();
+        Pane main = new Pane();             //create the main layout
         main.setPrefSize(800, 600);
 
-        Region background = new Region();
+        Region background = new Region();       //create background
         background.setPrefSize(800, 600);
         background.setStyle("-fx-background-color: rgba(0, 0, 0, 1)");
 
-        HBox mainLayout = new HBox(5);
+        HBox mainLayout = new HBox(5);  //horizontal box for the main layout
         mainLayout.setPadding(new Insets(5, 5, 5, 5));
-        Rectangle left = new Rectangle(550, 550);
-        left.setFill(Color.GREEN);
+        Image table = new Image(getClass().getResourceAsStream("images/table.png"), 550, 550, true, true);
+        ImageView view = new ImageView(table);
+        view.setX(550);
+        view.setY(550);;
         Rectangle right = new Rectangle(230, 550);
         right.setFill(Color.LIGHTGREEN);
 
         // LEFT
 
-        VBox leftVBox = new VBox(50);
-        leftVBox.setAlignment(Pos.TOP_CENTER);
+        VBox leftVBox = new VBox(40);
+        leftVBox.setAlignment(Pos.CENTER);
 
         Text dealerScore = new Text("Dealer: ");
+        HBox dealerBox = new HBox(15, dealerScore, dealerCards);
+        dealerBox.setPrefHeight(200);
+        dealerBox.setAlignment(Pos.TOP_CENTER);
         Text playerScore = new Text("Player: ");
+        HBox playerBox = new HBox(15, playerScore, playerCards);
+        playerBox.setPrefHeight(200);
+        playerBox.setAlignment(Pos.TOP_CENTER);
 
-        leftVBox.getChildren().addAll(dealerScore, dealerCards, winner, playerCards, playerScore);
+        leftVBox.getChildren().addAll(dealerBox, winner, playerBox);
 
         // RIGHT
 
@@ -72,7 +85,7 @@ public class Main extends Application{
         rightVBox.getChildren().addAll(playBtn, btnBox);
 
         // ADD BOTH PART TO MAIN LAYOUT
-        mainLayout.getChildren().addAll(new StackPane(left, leftVBox), new StackPane(right, rightVBox));
+        mainLayout.getChildren().addAll(new StackPane(view,  leftVBox),  new StackPane(right, rightVBox));
         main.getChildren().addAll(background, mainLayout);
 
         //BIND PROPERTIES
@@ -106,10 +119,9 @@ public class Main extends Application{
             }
             endGame();
         });
-
-        return main;
+    return main;
     }
-
+    //START GAME
     private void startGame(){
         playable.set(true);
         winner.setText("");
@@ -118,39 +130,56 @@ public class Main extends Application{
         player.reset();
 
         dealer.takeCard(decks.drawCard());
-        player.takeCard(decks.drawCard());
         dealer.takeCard(decks.drawCard());
-        player.takeCard(decks.drawCard());
+        delay.delay(500, ()->{
+            player.takeCard(decks.drawCard());
+            player.takeCard(decks.drawCard());
+        });
+
     }
 
+    //END GAME
     private void endGame(){
         playable.set(false);
         int dealerValue = dealer.valueProperty().get();
         int playerValue = player.valueProperty().get();
 
         if(dealerValue == playerValue){
-            winner.setText("DRAW");
+            delay.delay(300, ()->{
+                winner.setText("DRAW");
+                winner.setFont(Font.font(24));
+                winner.setFill(Color.WHITE);
+            });
         }
 
         else if (dealerValue == 21 || playerValue > 21 || dealerValue < 21 && playerValue < dealerValue){
-            winner.setText("DEALER WON");
+            delay.delay(300, ()->{
+                winner.setText("DEALER WON");
+                winner.setFont(Font.font(24));
+                winner.setFill(Color.WHITE);
+            });
         }
 
-        else if (playerValue == 21 || dealerValue > 21 || playerValue < 21 && dealerValue < playerValue){
-            winner.setText("PLAYER WON");
+        else {
+            delay.delay(300, ()->{
+                winner.setText("PLAYER WON");
+                winner.setFont(Font.font(24));
+                winner.setFill(Color.WHITE);
+            });
         }
     }
+
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        primaryStage.setScene(new Scene(createContent()));
-        primaryStage.setWidth(800);
+    public void start(Stage primaryStage) {
+        primaryStage.setScene(new Scene(createContent()));  //create the content
+        primaryStage.setWidth(800);                         //set size
         primaryStage.setHeight(600);
-        primaryStage.setResizable(false);
-        primaryStage.setTitle("BlackJack");
-        primaryStage.show();
+        primaryStage.setResizable(false);                   //make the window not resizable
+        primaryStage.setTitle("BlackJack");                 //name
+        primaryStage.show();                                //show the window
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args){ //start the game
         launch(args);
     }
 }
