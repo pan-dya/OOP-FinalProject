@@ -31,7 +31,8 @@ public class Main extends Application implements delay{
     private SimpleBooleanProperty playable = new SimpleBooleanProperty(false); //set playable to false, for buttons
 
     //create a horizontal box for the dealer and player
-    private HBox dealerCards = new HBox(20);
+    Rectangle flippedCard = new Rectangle(80, 120);
+    private HBox dealerCards = new HBox(20, flippedCard);
     private HBox playerCards = new HBox(20);
 
     private Parent createContent() {
@@ -59,8 +60,13 @@ public class Main extends Application implements delay{
         VBox leftVBox = new VBox(40);
         leftVBox.setAlignment(Pos.CENTER);
 
+        flippedCard.setArcHeight(20);
+        flippedCard.setArcWidth(20);
+        flippedCard.setFill(Color.CADETBLUE);
+        flippedCard.setVisible(false);
+
         Text dealerScore = new Text("Dealer: ");
-        HBox dealerBox = new HBox(15, dealerScore, dealerCards);
+        HBox dealerBox = new HBox(15, dealerScore, dealerCards, flippedCard);
         dealerBox.setPrefHeight(200);
         dealerBox.setAlignment(Pos.TOP_CENTER);
         Text playerScore = new Text("Player: ");
@@ -84,7 +90,7 @@ public class Main extends Application implements delay{
 
         rightVBox.getChildren().addAll(playBtn, btnBox);
 
-        // ADD BOTH PART TO MAIN LAYOUT
+        // ADD BOTH PART TO MAIN LAYOUT`
         mainLayout.getChildren().addAll(new StackPane(view,  leftVBox),  new StackPane(right, rightVBox));
         main.getChildren().addAll(background, mainLayout);
 
@@ -114,9 +120,6 @@ public class Main extends Application implements delay{
         hitBtn.setOnAction(event -> player.takeCard(decks.drawCard()));
 
         standBtn.setOnAction(event -> {
-            while(dealer.valueProperty().get() < 17){
-                dealer.takeCard(decks.drawCard());
-            }
             endGame();
         });
     return main;
@@ -130,7 +133,7 @@ public class Main extends Application implements delay{
         player.reset();
 
         dealer.takeCard(decks.drawCard());
-        dealer.takeCard(decks.drawCard());
+        flippedCard.setVisible(true);
         delay.delay(500, ()->{
             player.takeCard(decks.drawCard());
             player.takeCard(decks.drawCard());
@@ -141,6 +144,10 @@ public class Main extends Application implements delay{
     //END GAME
     private void endGame(){
         playable.set(false);
+        while(dealer.valueProperty().get() < 17){
+            dealer.takeCard(decks.drawCard());
+        }
+        flippedCard.setVisible(false);
         int dealerValue = dealer.valueProperty().get();
         int playerValue = player.valueProperty().get();
 
